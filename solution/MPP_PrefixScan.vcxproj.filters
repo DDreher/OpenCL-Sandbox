@@ -27,7 +27,7 @@
     <ClCompile Include="..\src\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PrefixScan.cpp">
+    <ClCompile Include="..\src\PrefixSum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

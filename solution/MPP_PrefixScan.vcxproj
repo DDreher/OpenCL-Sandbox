@@ -164,7 +164,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\OpenCLManager.cpp" />
-    <ClCompile Include="..\src\PrefixScan.cpp" />
+    <ClCompile Include="..\src\PrefixSum.cpp" />
     <ClCompile Include="..\src\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
