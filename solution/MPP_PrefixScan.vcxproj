@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\Definitions.h" />
     <ClInclude Include="..\include\OpenCLManager.h" />
+    <ClInclude Include="..\include\PrefixSum.h" />
     <ClInclude Include="..\include\Utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
