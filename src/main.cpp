@@ -5,9 +5,8 @@
 
 int main(int, char**)
 {
-    OpenCLManager opencl_mgr;
-
-    //opencl_mgr.LoadKernel("sum_kernel.cl", { "summe_kernel" });
+    OpenCLManager* mgr = OpenCLManager::GetInstance();
+    mgr->LoadKernel("kernel_prefix_sum.cl", { "PrefixSum" });
 
     std::vector<cl_int> test_elements = { 3,2,1,2,1,4,3,2 };
     std::vector<cl_int> expected_output = { 0,3,5,6,8,9,13,16 };
