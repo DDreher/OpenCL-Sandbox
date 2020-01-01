@@ -34,6 +34,22 @@ OpenCLManager::~OpenCLManager()
     }
 }
 
+OpenCLManager* OpenCLManager::GetInstance()
+{
+    if(instance_ == nullptr)
+    {
+        instance_ = new OpenCLManager();
+    }
+
+    return instance_;
+}
+
+void OpenCLManager::TearDown()
+{
+    delete instance_;
+    instance_ = nullptr;
+}
+
 void OpenCLManager::LoadKernel(const std::string& file_name, std::initializer_list<std::string> kernel_names)
 {
     cl_int status = 0;

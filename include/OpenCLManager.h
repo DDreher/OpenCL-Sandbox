@@ -8,8 +8,8 @@
 class OpenCLManager
 {
 public:
-    OpenCLManager();
-    ~OpenCLManager();
+    static OpenCLManager* GetInstance();
+    static void TearDown();
 
     cl_context context = 0;
     cl_command_queue command_queue = 0;
@@ -20,7 +20,11 @@ public:
     std::unordered_map<std::string, cl_kernel> kernel_map;
 
 private:
+    OpenCLManager();
+    ~OpenCLManager();
+    
     void Init();
 
+    static OpenCLManager* instance_ = nullptr;
     cl_device_id device_id_ = 0;
 };
