@@ -2,6 +2,7 @@
 #include "Definitions.h"
 #include <string>
 #include <fstream>
+#include "assert.h"
 
 std::pair<ReturnCode, std::string> Utility::ReadFile(const std::string& file_name)
 {
@@ -27,4 +28,10 @@ std::pair<ReturnCode, std::string> Utility::ReadFile(const std::string& file_nam
     }
 
     return { return_code, out_string };
+}
+
+uint32_t Utility::GetNextMultipleOf(uint32_t num_to_round, uint32_t num_multiple)
+{
+    assert(num_to_round!= 0);
+    return ((num_to_round + num_multiple - 1) / num_multiple) * num_multiple;
 }
