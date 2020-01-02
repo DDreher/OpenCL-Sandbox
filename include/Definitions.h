@@ -7,12 +7,13 @@ namespace filenames
 
 namespace kernels
 {
-    constexpr static const char* PREFIX_SUM = "PrefixSum_256";
+    constexpr static const char* PREFIX_SUM = "PrefixSum256";
+    constexpr static const char* PREFIX_CALC_E = "CalcE";
 }
 
 namespace constants
 {
-    constexpr uint32_t MAX_FIELD_SIZE = 256;
+    constexpr uint32_t MAX_WORK_GROUP_SIZE = 256;   // Just an assumption for academic purposes. Real value depends on device!
 }
 
 enum ReturnCode

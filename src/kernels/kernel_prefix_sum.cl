@@ -9,7 +9,7 @@ typedef long			int64_t;
 typedef unsigned long	uint64_t;
 
 
-__kernel void PrefixSum_256(__global int* in, __global int* out)
+__kernel void PrefixSum256(__global int* in, __global int* out)
 {
 	int gid = get_global_id(0);
 	int lid = get_local_id(0);
