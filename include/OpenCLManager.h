@@ -25,6 +25,6 @@ private:
     
     void Init();
 
-    static OpenCLManager* instance_ = nullptr;
+    static OpenCLManager* instance_;
     cl_device_id device_id_ = 0;
 };
