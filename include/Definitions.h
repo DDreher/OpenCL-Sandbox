@@ -13,7 +13,7 @@ namespace kernels
 
 namespace constants
 {
-    constexpr uint32_t MAX_WORK_GROUP_SIZE = 256;   // Just an assumption for academic purposes. Real value depends on device!
+    constexpr static const size_t MAX_WORK_GROUP_SIZE = 256;   // Just an assumption for academic purposes. Real value depends on device!
 }
 
 enum ReturnCode

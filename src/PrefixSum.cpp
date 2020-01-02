@@ -26,14 +26,15 @@ std::vector<cl_int> PrefixSum::CalculateGPU(const std::vector<cl_int>& elements)
     assert(mgr != nullptr);
     cl_int status = 0;
 
-    uint32_t next_multiple = Utility::GetNextMultipleOf(elements.size(), constants::MAX_WORK_GROUP_SIZE);
+    cl_int next_multiple = static_cast<cl_int>(
+        Utility::GetNextMultipleOf(static_cast<uint32_t>(elements.size()), static_cast<uint32_t>(constants::MAX_WORK_GROUP_SIZE)));
     
     // Allocate buffer A & B
     cl_mem input_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, next_multiple * sizeof(cl_int), NULL, NULL);           // Buffer A
     cl_mem sub_prefix_sum_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, next_multiple * sizeof(cl_int), NULL, NULL);  // Buffer B
 
     // Fill padded memory with zeros
-    uint32_t input_size = elements.size();
+    size_t input_size = elements.size();
     if (input_size < next_multiple)
     {
         cl_int zeros[constants::MAX_WORK_GROUP_SIZE] = { 0 };
@@ -57,14 +58,14 @@ std::vector<cl_int> PrefixSum::CalculateGPU(const std::vector<cl_int>& elements)
     return result;
 }
 
-std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t num_elements)
+std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, cl_int num_elements)
 {
     OpenCLManager* mgr = OpenCLManager::GetInstance();
     assert(mgr != nullptr);
     cl_int status = 0;
 
     // Allocate buffer C & D
-    uint32_t num_sub_arrays = num_elements / constants::MAX_WORK_GROUP_SIZE;
+    cl_int num_sub_arrays = num_elements / static_cast<cl_int>(constants::MAX_WORK_GROUP_SIZE);
     cl_mem c_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_sub_arrays * sizeof(cl_int), NULL, NULL);
     cl_mem d_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_sub_arrays * sizeof(cl_int), NULL, NULL);
 
@@ -80,12 +81,12 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
     assert(status == ReturnCode::SUCCESS);
 
     // Run prefix scan kernel
-    size_t global_work_size[1] = { num_sub_arrays };
+    size_t global_work_size[1] = { static_cast<size_t>(num_elements) };
     size_t local_work_size[1] = { static_cast<size_t>(constants::MAX_WORK_GROUP_SIZE) };    // Use a full wavefront/warp as local work size
     status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_prefix_scan, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
     assert(status == ReturnCode::SUCCESS);
 
-    if(num_sub_arrays > constants::MAX_WORK_GROUP_SIZE)
+    if(num_elements > constants::MAX_WORK_GROUP_SIZE) // TODO: Checken
     {
         // the c / d buffer will be bigger than MAX_WORK_GROUP_SIZE
         // -> We have to do process these buffers recursively
@@ -100,13 +101,15 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
 
         // Set kernel arguments.
         const cl_kernel kernel_calc_e = mgr->kernel_map[kernels::PREFIX_CALC_E];
-        status = clSetKernelArg(kernel_calc_e, 0, sizeof(cl_mem), (void*)&d_buffer);
+        status = clSetKernelArg(kernel_calc_e, 0, sizeof(cl_mem), (void*)&b_buffer);
         assert(status == ReturnCode::SUCCESS);
-        status = clSetKernelArg(kernel_calc_e, 1, sizeof(cl_mem), (void*)&e_buffer);
+        status = clSetKernelArg(kernel_calc_e, 1, sizeof(cl_mem), (void*)&d_buffer);
+        assert(status == ReturnCode::SUCCESS);
+        status = clSetKernelArg(kernel_calc_e, 2, sizeof(cl_mem), (void*)&e_buffer);
         assert(status == ReturnCode::SUCCESS);
 
         // Run the kernel.
-        size_t global_work_size[1] = { num_elements };
+        size_t global_work_size[1] = { static_cast<size_t>(num_elements) };
         size_t local_work_size[1] = { static_cast<size_t>(constants::MAX_WORK_GROUP_SIZE) };    // Use a full wavefront/warp as local work size
         status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_calc_e, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
         assert(status == ReturnCode::SUCCESS);
