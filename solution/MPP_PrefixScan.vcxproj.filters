@@ -35,6 +35,9 @@
     <None Include="..\kernels\sum_kernel.cl">
       <Filter>Kernels</Filter>
     </None>
+    <None Include="..\src\kernels\kernel_prefix_sum.cl">
+      <Filter>Kernels</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\OpenCLManager.h">

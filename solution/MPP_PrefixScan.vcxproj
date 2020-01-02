@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\kernels\sum_kernel.cl" />
+    <None Include="..\src\kernels\kernel_prefix_sum.cl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Definitions.h" />
