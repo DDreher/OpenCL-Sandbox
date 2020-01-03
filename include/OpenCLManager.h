@@ -1,6 +1,4 @@
 #pragma once
-#include "Definitions.h"
-
 #include <CL/cl.h>
 #include <string>
 #include <unordered_map>

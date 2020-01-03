@@ -4,10 +4,10 @@
 #include <fstream>
 #include "assert.h"
 
-std::pair<ReturnCode, std::string> Utility::ReadFile(const std::string& file_name)
+std::pair<mpp::ReturnCode, std::string> Utility::ReadFile(const std::string& file_name)
 {
     std::string out_string = "";
-    ReturnCode return_code = ReturnCode::ERROR;
+    mpp::ReturnCode return_code = mpp::ReturnCode::CODE_ERROR;
 
     std::fstream file_stream(file_name, (std::fstream::in | std::fstream::binary));
     if (file_stream.is_open())
@@ -24,7 +24,7 @@ std::pair<ReturnCode, std::string> Utility::ReadFile(const std::string& file_nam
         out_string = str;
         delete[] str;
 
-        return_code = ReturnCode::SUCCESS;
+        return_code = mpp::ReturnCode::CODE_SUCCESS;
     }
 
     return { return_code, out_string };

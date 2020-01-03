@@ -7,7 +7,7 @@
 int main(int, char**)
 {
     OpenCLManager* mgr = OpenCLManager::GetInstance();
-    mgr->LoadKernel(filenames::KERNELS_PREFIX_SUM, { kernels::PREFIX_SUM, kernels::PREFIX_CALC_E });
+    mgr->LoadKernel(mpp::filenames::KERNELS_PREFIX_SUM, { mpp::kernels::PREFIX_SUM, mpp::kernels::PREFIX_CALC_E });
 
     std::vector<cl_int> test_elements;
     std::vector<cl_int> expected_output;
