@@ -4,6 +4,10 @@
 #include "Definitions.h"
 #include "PrefixSum.h"
 #include "OpenCLManager.h"
+#include "Utilities.h"
+
+#include <stdio.h>
+#include <iostream>
 
 TEST_CASE("PrefixSum CPU", "[cpu]")
 {
@@ -250,69 +254,103 @@ TEST_CASE("PrefixSum Kernel Calculate e_buffer", "[kernel e_buffer]")
 
 TEST_CASE("PrefixSum GPU", "[gpu]")
 {
+    Timer timer;
+
     OpenCLManager* mgr = OpenCLManager::GetInstance();
     mgr->LoadKernel(mpp::filenames::KERNELS_PREFIX_SUM, { mpp::kernels::PREFIX_SUM, mpp::kernels::PREFIX_CALC_E });
 
     std::vector<cl_int> test_elements;
     std::vector<cl_int> expected_output;
 
-    SECTION("Size==256")
-    {
-        // Fill input elements and expected output elements 
-        for (cl_int i = 0; i < 256; ++i)
-        {
-            cl_int val = 1;
-            test_elements.push_back(val);
-        }
-        expected_output = PrefixSum::CalculateCPU(test_elements);
-
-        // Test the output
-        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
-        REQUIRE(test_prefix_sum == expected_output);
-    };
-
     SECTION("Size<256")
     {
+        std::cout << "--------------- PrefixScan - 100 elements --------------- " << std::endl;
+
         // Fill input elements and expected output elements 
         for (cl_int i = 0; i < 100; ++i)
         {
             cl_int val = 1;
             test_elements.push_back(val);
         }
+
+        timer.Reset();
         expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
 
         // Test the output
+        REQUIRE(test_prefix_sum == expected_output);
+    };
+
+    SECTION("Size==256")
+    {
+        std::cout << "--------------- PrefixScan - 256 elements --------------- " << std::endl;
+
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < 256; ++i)
+        {
+            cl_int val = 1;
+            test_elements.push_back(val);
+        }
+
+        timer.Reset();
+        expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
         std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        // Test the output
         REQUIRE(test_prefix_sum == expected_output);
     };
 
     SECTION("Size>256 && MultipleOf256")
     {
+        std::cout << "--------------- PrefixScan - 512 elements --------------- " << std::endl;
+
         // Fill input elements and expected output elements 
         for (cl_int i = 0; i < 512; ++i)
         {
             cl_int val = 1;
             test_elements.push_back(val);
         }
+
+        timer.Reset();
         expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
 
         // Test the output
-        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
         REQUIRE(test_prefix_sum == expected_output);
     };
 
     SECTION("Size>256 && NoMultipleOf256")
     {
+        std::cout << "--------------- PrefixScan - 1000 elements --------------- " << std::endl;
+
         // Fill input elements and expected output elements 
         for (cl_int i = 0; i < 1000; ++i)
         {
             cl_int val = i;
             test_elements.push_back(val);
         }
+
+        timer.Reset();
         expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
 
         // Test the output
-        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
         REQUIRE(test_prefix_sum == expected_output);
     };
 
@@ -326,8 +364,9 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
         }
         expected_output = PrefixSum::CalculateCPU(test_elements);
 
-        // Test the output
         std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+
+        // Test the output
         REQUIRE(test_prefix_sum == expected_output);
     };
 
@@ -341,24 +380,80 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
         }
         expected_output = PrefixSum::CalculateCPU(test_elements);
 
-        // Test the output
         std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+
+        // Test the output
         REQUIRE(test_prefix_sum == expected_output);
     };
 
     SECTION("size == 1_000_000")
     {
-        size_t size = 1000000;
+        std::cout << "--------------- PrefixScan - 1'000'000 elements --------------- " << std::endl;
+        size_t size = 1'000'000;
         // Fill input elements and expected output elements 
         for (cl_int i = 0; i < size; ++i)
         {
             cl_int val = i;
             test_elements.push_back(val);
         }
+
+        timer.Reset();
         expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
 
         // Test the output
-        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
         REQUIRE(test_prefix_sum == expected_output);
+    };
+
+    SECTION("size == 10'000'000")
+    {
+        std::cout << "--------------- PrefixScan - 10'000'000 elements --------------- " << std::endl;
+        size_t size = 10'000'000;
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < size; ++i)
+        {
+            cl_int val = i;
+            test_elements.push_back(val);
+        }
+        
+        timer.Reset();
+        expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        // Test the output
+        REQUIRE(test_prefix_sum == expected_output);
+    };
+
+    SECTION("size == 100'000'000")
+    {
+        std::cout << "--------------- PrefixScan - 10'000'000 elements --------------- " << std::endl;
+        size_t size = 100'000'000;
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < size; ++i)
+        {
+            cl_int val = i;
+            test_elements.push_back(val);
+        }
+
+        timer.Reset();
+        expected_output = PrefixSum::CalculateCPU(test_elements);
+        std::cout << "Duration CPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        timer.Reset();
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        std::cout << "Duration GPU: " << timer.GetElapsed() << " seconds" << std::endl;
+
+        // Test the output
+        REQUIRE(test_prefix_sum == expected_output);
+        /*std::cout << "Press enter to close..." << std::endl;
+        std::cin.get();*/
     };
 };

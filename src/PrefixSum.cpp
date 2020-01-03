@@ -107,15 +107,15 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // debug
-    {
-        std::vector<cl_int> vec_c_buffer(num_sub_arrays, 0);
-        status = clEnqueueReadBuffer(mgr->command_queue, c_buffer, CL_TRUE, 0, num_sub_arrays * sizeof(cl_int), vec_c_buffer.data(), 0, NULL, NULL);
-        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    //{
+    //    std::vector<cl_int> vec_c_buffer(num_sub_arrays, 0);
+    //    status = clEnqueueReadBuffer(mgr->command_queue, c_buffer, CL_TRUE, 0, num_sub_arrays * sizeof(cl_int), vec_c_buffer.data(), 0, NULL, NULL);
+    //    assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-        std::vector<cl_int> vec_d_buffer(num_sub_arrays, 0);
-        status = clEnqueueReadBuffer(mgr->command_queue, d_buffer, CL_TRUE, 0, num_sub_arrays * sizeof(cl_int), vec_d_buffer.data(), 0, NULL, NULL);
-        assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    }
+    //    std::vector<cl_int> vec_d_buffer(num_sub_arrays, 0);
+    //    status = clEnqueueReadBuffer(mgr->command_queue, d_buffer, CL_TRUE, 0, num_sub_arrays * sizeof(cl_int), vec_d_buffer.data(), 0, NULL, NULL);
+    //    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    //}
 
     if(num_sub_arrays > 1)
     {
@@ -150,9 +150,9 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // Debug
-        std::vector<cl_int> result(num_elements, 0);
+        /*std::vector<cl_int> result(num_elements, 0);
         status = clEnqueueReadBuffer(mgr->command_queue, b_buffer, CL_TRUE, 0, num_elements * sizeof(cl_int), result.data(), 0, NULL, NULL);
-        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);*/
 
         // release buffers
         status = clReleaseMemObject(d_buffer);
