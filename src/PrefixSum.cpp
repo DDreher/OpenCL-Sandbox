@@ -101,7 +101,7 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
     //assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // Run prefix scan kernel
-    size_t global_work_size[1] = { static_cast<size_t>(std::max(static_cast<size_t>(num_elements), mpp::constants::MAX_THREADS_PER_CU)) };
+    size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
     size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_THREADS_PER_CU) };
     status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_prefix_scan, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
@@ -144,8 +144,8 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // Run the kernel.
-        size_t global_work_size[1] = { static_cast<size_t>(std::max(static_cast<size_t>(num_elements), mpp::constants::MAX_THREADS_PER_CU)) };
-        size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_THREADS_PER_CU) };    // Use a full wavefront/warp as local work size
+        size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
+        size_t local_work_size[1] = { mpp::constants::MAX_THREADS_PER_CU };    // Use a full wavefront/warp as local work size
         status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_calc_e, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 

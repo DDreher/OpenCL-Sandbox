@@ -197,7 +197,7 @@ TEST_CASE("PrefixSum Kernel Calculate e_buffer", "[kernel e_buffer]")
             tmp += test_elements[i];
         }
 
-        for(cl_int i=group_size-1; i<total_size; i+=group_size)
+        for(size_t i = group_size-1; i < total_size; i += group_size)
         {
             vec_d_buffer.push_back(test_elements[i] + vec_b_buffer[i]);
         }
@@ -316,7 +316,6 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
         REQUIRE(test_prefix_sum == expected_output);
     };
 
-
     SECTION("val == 0")
     {
         // Fill input elements and expected output elements 
@@ -338,6 +337,22 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
         for (cl_int i = 0; i < 512; ++i)
         {
             cl_int val = -i;
+            test_elements.push_back(val);
+        }
+        expected_output = PrefixSum::CalculateCPU(test_elements);
+
+        // Test the output
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        REQUIRE(test_prefix_sum == expected_output);
+    };
+
+    SECTION("size == 1_000_000")
+    {
+        size_t size = 1000000;
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < size; ++i)
+        {
+            cl_int val = i;
             test_elements.push_back(val);
         }
         expected_output = PrefixSum::CalculateCPU(test_elements);
