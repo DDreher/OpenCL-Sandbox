@@ -1,5 +1,5 @@
-#define MAX_WORK_GROUP_SIZE 256
-#define LOG2_WORK_GROUP_SIZE 2
+#define MAX_THREADS_PER_CU 256
+#define LOG2_MAX_THREADS_PER_CU 8
 
 // Typedefs for better comparison of host and device types
 typedef char				int8_t;
@@ -17,17 +17,17 @@ __kernel void PrefixSum256(__global int32_t* buffer_a, __global int32_t* buffer_
 	int32_t local_id = get_local_id(0);
 	int32_t group_id = get_group_id(0);
 
-	__local int32_t local_array[MAX_WORK_GROUP_SIZE];
+	__local int32_t local_array[MAX_THREADS_PER_CU];
 
 	// copy to local memory
 	local_array[local_id] = buffer_a[global_id];
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	int32_t tree_depth = LOG2_WORK_GROUP_SIZE; // Depth of a balanced tree with k leaves is log(k)
+	int32_t tree_depth = LOG2_MAX_THREADS_PER_CU; // Depth of a balanced tree with k leaves is log(k)
 	size_t depth = 0;
 
 	// Up-Sweep / Reduce Phase
-	int32_t num_working_items = MAX_WORK_GROUP_SIZE >> 1;
+	int32_t num_working_items = MAX_THREADS_PER_CU >> 1;
 	int32_t offset = 1;
 	for (size_t depth = 0; depth<tree_depth; ++depth)
 	{
@@ -45,14 +45,14 @@ __kernel void PrefixSum256(__global int32_t* buffer_a, __global int32_t* buffer_
 	}
 
 	// Down-Sweep Phase
-	if (local_id == MAX_WORK_GROUP_SIZE-1)
+	if (local_id == MAX_THREADS_PER_CU -1)
 	{
-		local_array[MAX_WORK_GROUP_SIZE-1] = 0;
+		local_array[MAX_THREADS_PER_CU -1] = 0;
 	}
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	num_working_items = 1;
-	offset = MAX_WORK_GROUP_SIZE >> 1;
+	offset = MAX_THREADS_PER_CU >> 1;
 	for (size_t depth = 0; depth<tree_depth; ++depth)
 	{
 		if (local_id < num_working_items)
@@ -75,7 +75,7 @@ __kernel void PrefixSum256(__global int32_t* buffer_a, __global int32_t* buffer_
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	// write resulting buffer_c
-	if(local_id == MAX_WORK_GROUP_SIZE-1)
+	if(local_id == MAX_THREADS_PER_CU -1)
 	{
 		buffer_c[group_id] = buffer_a[global_id] + buffer_b[global_id];
 	}
