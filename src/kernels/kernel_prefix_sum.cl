@@ -24,7 +24,6 @@ __kernel void PrefixSum256(__global int32_t* buffer_a, __global int32_t* buffer_
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	int32_t tree_depth = LOG2_MAX_THREADS_PER_CU; // Depth of a balanced tree with k leaves is log(k)
-	size_t depth = 0;
 
 	// Up-Sweep / Reduce Phase
 	int32_t num_working_items = MAX_THREADS_PER_CU >> 1;

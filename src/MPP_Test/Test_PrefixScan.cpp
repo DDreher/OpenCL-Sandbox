@@ -208,8 +208,10 @@ TEST_CASE("PrefixSum Kernel Calculate e_buffer", "[kernel e_buffer]")
         // Allocate buffers
         cl_mem b_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_elements * sizeof(cl_int), NULL, NULL);
         status = clEnqueueWriteBuffer(mgr->command_queue, b_buffer, CL_TRUE, 0, vec_b_buffer.size() * sizeof(cl_int), vec_b_buffer.data(), 0, NULL, NULL);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
         cl_mem d_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_elements * sizeof(cl_int), NULL, NULL);
         status = clEnqueueWriteBuffer(mgr->command_queue, d_buffer, CL_TRUE, 0, vec_d_buffer.size() * sizeof(cl_int), vec_d_buffer.data(), 0, NULL, NULL);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
         cl_mem e_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_elements * sizeof(cl_int), NULL, NULL);
 
         // Set kernel args
@@ -299,49 +301,49 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
         REQUIRE(test_prefix_sum == expected_output);
     };
 
-    //SECTION("Size>256 && NoMultipleOf256")
-    //{
-    //    // Fill input elements and expected output elements 
-    //    for (cl_int i = 0; i < 1000; ++i)
-    //    {
-    //        cl_int val = i;
-    //        test_elements.push_back(val);
-    //    }
-    //    expected_output = PrefixSum::CalculateCPU(test_elements);
+    SECTION("Size>256 && NoMultipleOf256")
+    {
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < 1000; ++i)
+        {
+            cl_int val = i;
+            test_elements.push_back(val);
+        }
+        expected_output = PrefixSum::CalculateCPU(test_elements);
 
-    //    // Test the output
-    //    std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
-    //    REQUIRE(test_prefix_sum == expected_output);
-    //};
+        // Test the output
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        REQUIRE(test_prefix_sum == expected_output);
+    };
 
 
-    //SECTION("val == 0")
-    //{
-    //    // Fill input elements and expected output elements 
-    //    for (cl_int i = 0; i < 512; ++i)
-    //    {
-    //        cl_int val = 0;
-    //        test_elements.push_back(val);
-    //    }
-    //    expected_output = PrefixSum::CalculateCPU(test_elements);
+    SECTION("val == 0")
+    {
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < 512; ++i)
+        {
+            cl_int val = 0;
+            test_elements.push_back(val);
+        }
+        expected_output = PrefixSum::CalculateCPU(test_elements);
 
-    //    // Test the output
-    //    std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
-    //    REQUIRE(test_prefix_sum == expected_output);
-    //};
+        // Test the output
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        REQUIRE(test_prefix_sum == expected_output);
+    };
 
-    //SECTION("val < 0")
-    //{
-    //    // Fill input elements and expected output elements 
-    //    for (cl_int i = 0; i < 512; ++i)
-    //    {
-    //        cl_int val = -i;
-    //        test_elements.push_back(val);
-    //    }
-    //    expected_output = PrefixSum::CalculateCPU(test_elements);
+    SECTION("val < 0")
+    {
+        // Fill input elements and expected output elements 
+        for (cl_int i = 0; i < 512; ++i)
+        {
+            cl_int val = -i;
+            test_elements.push_back(val);
+        }
+        expected_output = PrefixSum::CalculateCPU(test_elements);
 
-    //    // Test the output
-    //    std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
-    //    REQUIRE(test_prefix_sum == expected_output);
-    //};
+        // Test the output
+        std::vector<cl_int> test_prefix_sum = PrefixSum::CalculateGPU(test_elements);
+        REQUIRE(test_prefix_sum == expected_output);
+    };
 };

@@ -10,5 +10,5 @@ public:
     static int praefixsumme(cl_int* input, cl_int* output, int size);
    
 private:
-    static std::vector<cl_int> CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, cl_int num_elements);
+    static void CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t num_elements);
 };
