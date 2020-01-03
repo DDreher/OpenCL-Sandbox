@@ -15,7 +15,7 @@ namespace mpp
 
     namespace constants
     {
-        static constexpr size_t MAX_WORK_GROUP_SIZE = 256;   // Just an assumption for academic purposes. Real value depends on device!
+        static constexpr size_t MAX_THREADS_PER_CU = 256;   // Just an assumption for academic purposes. Real value depends on device!
     };
 
     enum ReturnCode

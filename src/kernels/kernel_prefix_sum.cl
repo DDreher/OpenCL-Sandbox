@@ -81,11 +81,14 @@ __kernel void PrefixSum256(__global int32_t* buffer_a, __global int32_t* buffer_
 	}
 }
 
-__kernel void CalcE(__global int32_t* buffer_b, __global int32_t* buffer_d, __global int32_t* buffer_e)
+__kernel void CalcE(__global int32_t* buffer_b, __global int32_t* buffer_d, __global int32_t* buffer_e, __private uint32_t num_elements)
 {
 	int32_t global_id = get_global_id(0);
 	int32_t local_id = get_local_id(0);
 	int32_t group_id = get_group_id(0);
 
-	buffer_e[global_id] = buffer_b[global_id] + buffer_d[group_id];
+	if (global_id < num_elements)
+	{
+		buffer_e[global_id] = buffer_b[global_id] + buffer_d[group_id];
+	}
 }

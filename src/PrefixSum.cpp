@@ -27,19 +27,19 @@ std::vector<cl_int> PrefixSum::CalculateGPU(const std::vector<cl_int>& elements)
     cl_int status = 0;
 
     cl_int next_multiple = static_cast<cl_int>(
-        Utility::GetNextMultipleOf(static_cast<uint32_t>(elements.size()), static_cast<uint32_t>(mpp::constants::MAX_WORK_GROUP_SIZE)));
+        Utility::GetNextMultipleOf(static_cast<uint32_t>(elements.size()), static_cast<uint32_t>(mpp::constants::MAX_THREADS_PER_CU)));
     
     // Allocate buffer A & B
     cl_mem input_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, next_multiple * sizeof(cl_int), NULL, NULL);           // Buffer A
-    cl_mem sub_prefix_sum_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, next_multiple * sizeof(cl_int), NULL, NULL);  // Buffer B
+    status = clEnqueueWriteBuffer(mgr->command_queue, input_buffer, CL_TRUE, 0, elements.size() * sizeof(cl_int), elements.data(), 0, NULL, NULL);
+    cl_mem sub_prefix_sum_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(cl_int), NULL, NULL);  // Buffer B
 
     // Fill padded memory with zeros
-    size_t input_size = elements.size();
-    if (input_size < next_multiple)
+    if (elements.size() < next_multiple)
     {
-        cl_int zeros[mpp::constants::MAX_WORK_GROUP_SIZE] = { 0 };
-        size_t offset = input_size * sizeof(cl_int);
-        size_t num_bytes_written = (next_multiple - input_size) * sizeof(cl_int);
+        cl_int zeros[mpp::constants::MAX_THREADS_PER_CU] = { 0 };
+        size_t offset = elements.size() * sizeof(cl_int);
+        size_t num_bytes_written = (next_multiple - elements.size()) * sizeof(cl_int);
         status = clEnqueueWriteBuffer(mgr->command_queue, input_buffer, CL_TRUE, offset, num_bytes_written, &zeros, 0, NULL, NULL);
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
     }
@@ -65,7 +65,7 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
     cl_int status = 0;
 
     // Allocate buffer C & D
-    cl_int num_sub_arrays = num_elements / static_cast<cl_int>(mpp::constants::MAX_WORK_GROUP_SIZE);
+    cl_int num_sub_arrays = num_elements / static_cast<cl_int>(mpp::constants::MAX_THREADS_PER_CU);
     cl_mem c_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_sub_arrays * sizeof(cl_int), NULL, NULL);
     cl_mem d_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_sub_arrays * sizeof(cl_int), NULL, NULL);
 
@@ -82,11 +82,11 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
 
     // Run prefix scan kernel
     size_t global_work_size[1] = { static_cast<size_t>(num_elements) };
-    size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_WORK_GROUP_SIZE) };    // Use a full wavefront/warp as local work size
+    size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_THREADS_PER_CU) };    // Use a full wavefront/warp as local work size
     status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_prefix_scan, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-    if(num_elements > mpp::constants::MAX_WORK_GROUP_SIZE) // TODO: Checken
+    if(num_sub_arrays > mpp::constants::MAX_THREADS_PER_CU) // TODO: Checken
     {
         // the c / d buffer will be bigger than MAX_WORK_GROUP_SIZE
         // -> We have to do process these buffers recursively
@@ -95,7 +95,7 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
     else
     {
         // c / d buffers are not bigger than a wavefront -> we can calculate final results
-        cl_mem e_buffer = clCreateBuffer(mgr->context, CL_MEM_WRITE_ONLY, num_elements * sizeof(cl_int), NULL, NULL);
+        cl_mem e_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, num_elements * sizeof(cl_int), NULL, NULL);
         
         // TODO: Padding to next multiple of wavefront size?
 
@@ -107,10 +107,12 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
         status = clSetKernelArg(kernel_calc_e, 2, sizeof(cl_mem), (void*)&e_buffer);
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
+        status = clSetKernelArg(kernel_calc_e, 3, sizeof(cl_uint), &num_elements);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // Run the kernel.
         size_t global_work_size[1] = { static_cast<size_t>(num_elements) };
-        size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_WORK_GROUP_SIZE) };    // Use a full wavefront/warp as local work size
+        size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_THREADS_PER_CU) };    // Use a full wavefront/warp as local work size
         status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_calc_e, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
@@ -129,47 +131,4 @@ std::vector<cl_int> PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_
 
         return result;
     }
-}
-
-// size of arrays must be exactly 256
-int PrefixSum::praefixsumme(cl_int* input, cl_int* output, int size)
-{
-    OpenCLManager* mgr = OpenCLManager::GetInstance();
-    cl_int status;
-
-    int clsize = 256;
-
-    // create OpenClinput buffer
-    cl_mem inputBuffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, clsize * sizeof(cl_int), NULL, NULL);
-    status = clEnqueueWriteBuffer(mgr->command_queue, inputBuffer, CL_TRUE, 0, clsize * sizeof(cl_int), input, 0, NULL, NULL);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    // create OpenCl buffer for output
-    cl_mem outputBuffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, clsize * sizeof(cl_int), NULL, NULL);
-
-    // Set kernel arguments.
-    const cl_kernel kernel = mgr->kernel_map[mpp::kernels::PREFIX_SUM];
-    status = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*)&inputBuffer);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void*)&outputBuffer);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    // Run the kernel.
-    size_t global_work_size[1] = { static_cast<size_t>(clsize) };
-    size_t local_work_size[1] = { static_cast<size_t>(clsize) };
-    status = clEnqueueNDRangeKernel(mgr->command_queue, kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    // get resulting array
-    status = clEnqueueReadBuffer(mgr->command_queue, outputBuffer, CL_TRUE, 0, clsize * sizeof(cl_int), output, 0, NULL, NULL);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    // release buffers
-    status = clReleaseMemObject(inputBuffer);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    status = clReleaseMemObject(outputBuffer);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    
-    return mpp::ReturnCode::CODE_SUCCESS;
 }
