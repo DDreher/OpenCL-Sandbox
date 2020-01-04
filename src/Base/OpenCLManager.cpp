@@ -58,7 +58,7 @@ void OpenCLManager::LoadKernel(const std::string& file_name, std::initializer_li
 
     // Read file content
     auto [return_code, file_content] = Utility::ReadFile("src/kernels/" + file_name);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    assert(return_code == mpp::ReturnCode::CODE_SUCCESS);
 
     // Create program
     const char* program_source = file_content.c_str();

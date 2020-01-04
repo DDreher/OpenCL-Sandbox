@@ -7,12 +7,16 @@ namespace mpp
     namespace filenames
     {
         static constexpr char KERNELS_PREFIX_SUM[] = "kernel_prefix_sum.cl";
+        static constexpr char KERNELS_HASHTABLE[] = "kernel_hashtable.cl";
     };
 
     namespace kernels
     {
         static constexpr char PREFIX_SUM[] = "PrefixSum256";
         static constexpr char PREFIX_CALC_E[] = "CalcE";
+
+        static constexpr char HASHTABLE_INSERT[] = "Insert";
+        static constexpr char HASHTABLE_RETRIEVE[] = "Retrieve";
     };
 
     namespace constants

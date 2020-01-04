@@ -179,14 +179,14 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\src\kernels\kernel_prefix_sum.cl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\PrefixSum\Main.cpp" />
     <ClCompile Include="..\..\src\PrefixSum\PrefixSum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\PrefixSum\PrefixSum.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\kernels\kernel_prefix_sum.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

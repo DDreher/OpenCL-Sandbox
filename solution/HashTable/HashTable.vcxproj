@@ -170,7 +170,14 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\HashTable\HashTable.cpp" />
     <ClCompile Include="..\..\src\HashTable\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\HashTable\HashTable.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\kernels\kernel_hashtable.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
