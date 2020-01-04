@@ -23,6 +23,7 @@
     <ProjectGuid>{2AC23EBE-4A07-4055-970A-6FDBD00A243B}</ProjectGuid>
     <RootNamespace>MPPTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>PrefixScan_Test</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
