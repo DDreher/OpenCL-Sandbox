@@ -1,8 +1,8 @@
 #include <iostream>
 #include <filesystem>
-#include "OpenCLManager.h"
-#include "PrefixSum.h"
-#include "Definitions.h"
+#include "Base/OpenCLManager.h"
+#include "Base/Definitions.h"
+#include "PrefixSum/PrefixSum.h"
 
 int main(int, char**)
 {

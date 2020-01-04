@@ -1,6 +1,6 @@
-#include "OpenCLManager.h"
-#include "Definitions.h"
-#include "Utilities.h"
+#include "Base/OpenCLManager.h"
+#include "Base/Definitions.h"
+#include "Base/Utilities.h"
 #include <assert.h>
 #include <iostream>
 

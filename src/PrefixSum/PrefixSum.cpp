@@ -1,7 +1,8 @@
-#include "PrefixSum.h"
-#include "Definitions.h"
-#include "OpenCLManager.h"
-#include "Utilities.h"
+#include "Base/Definitions.h"
+#include "Base/OpenCLManager.h"
+#include "Base/Utilities.h"
+#include "PrefixSum/PrefixSum.h"
+
 #include <assert.h>
 #include <algorithm>
 

@@ -4,10 +4,7 @@
 #include <iostream>
 #include <chrono>
 
-namespace mpp
-{
-    enum ReturnCode;
-}
+#include "Base/Definitions.h"
 
 class Utility
 {
