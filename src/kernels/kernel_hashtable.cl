@@ -1,4 +1,6 @@
-﻿// Typedefs for better comparison of host and device types
+﻿#pragma OPENCL EXTENSION cl_khr_int64_base_atomics: enable
+
+// Typedefs for better comparison of host and device types
 typedef char				int8_t;
 typedef unsigned char		uint8_t;
 typedef short				int16_t;
@@ -14,6 +16,7 @@ typedef unsigned long		uint64_t;
 #define KEY_EMPTY 0xFFFFFFFF
 
 #define GET_KEY(entry) ( (uint32_t)((entry) >> 32) )
+
 #define MAKE_ENTRY(key,value) ( (((uint64_t)key) << 32) + (value) )
 #define HASH_FUNCTION(key, a, b, table_size) ( (a * key + b) % HASH_P % table_size  )
 

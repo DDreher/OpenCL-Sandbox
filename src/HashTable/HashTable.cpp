@@ -1,4 +1,5 @@
 #include "HashTable/HashTable.h"
+#include <CL\cl.h>
 
 HashTable::HashTable(uint32_t size) : size_(size)
 {

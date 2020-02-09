@@ -16,25 +16,30 @@ TEST_CASE("HashTable", "[gpu]")
 
     SECTION("Try to retrieve element from empty table")
     {
+        HashTable hash_table(10);
     }
 
     SECTION("Insert one element")
     {
         size_t num_elements = 1;
+        HashTable hash_table(num_elements);
     }
 
     SECTION("Retrieve one element")
     {
         size_t num_elements = 1;
+        HashTable hash_table(num_elements);
     }
 
     SECTION("Insert thousand elements")
     {
         size_t num_elements = 1000;
+        HashTable hash_table(num_elements);
     }
 
     SECTION("Retrieve thousand elements")
     {
         size_t num_elements = 1000;
+        HashTable hash_table(num_elements);
     }
 }

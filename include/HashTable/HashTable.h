@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <CL\cl.h>
 
 struct Entry
 {
