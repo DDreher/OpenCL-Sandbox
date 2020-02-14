@@ -56,7 +56,7 @@ bool HashTable::Init(uint32_t table_size, const std::vector<uint32_t>& keys, con
 
         if(success)
         {
-            continue;
+            break;
         }
     }
 

@@ -28,7 +28,7 @@ TEST_CASE("HashTable", "[gpu]")
 
     SECTION("Try to retrieve multiple elements from empty table")
     {
-        std::vector<uint32_t> keys = { 1,2,3,10,11,42 };
+        std::vector<uint32_t> keys = { 1, 2, 3, 10, 11, 42 };
 
         HashTable hash_table;
         hash_table.Init(keys.size());
