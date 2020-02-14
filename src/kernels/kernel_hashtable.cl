@@ -30,7 +30,7 @@ typedef unsigned long		uint64_t;
 #define MAKE_ENTRY(key,value) ( (((uint64_t)key) << 32) + (value) )
 #define HASH_FUNCTION(key, a, b, table_size) ( (a * key + b) % HASH_P % table_size  )
 
-__kernel void Insert(__global uint32_t* keys, __global uint32_t* values, __global uint64_t* table, __constant uint32_t* params, __global uint32_t* out_status)
+__kernel void Insert(__global uint32_t* keys, __global uint32_t* values, __global uint64_t* table, __constant uint32_t* params)
 {
 	int32_t global_id = get_global_id(0);
 	int32_t local_id = get_local_id(0);
@@ -43,6 +43,7 @@ __kernel void Insert(__global uint32_t* keys, __global uint32_t* values, __globa
 
 	if (key == KEY_EMPTY)
 	{
+		keys[global_id] = STATUS_SUCCESS;
 		return;
 	}
 
@@ -58,6 +59,7 @@ __kernel void Insert(__global uint32_t* keys, __global uint32_t* values, __globa
 	
 		if (key == KEY_EMPTY) 
 		{
+			keys[global_id] = STATUS_SUCCESS;
 			return;
 		}
 	

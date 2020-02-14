@@ -25,6 +25,7 @@ namespace mpp
         static constexpr std::array<cl_int, MAX_THREADS_PER_CU> ZEROS = std::array<cl_int, MAX_THREADS_PER_CU>();
         static constexpr size_t WAVEFRONT_SIZE = 32;
         static constexpr uint64_t EMPTY = -1;
+        static constexpr uint32_t EMPTY_32 = -1;
     };
 
     enum ReturnCode
