@@ -16,49 +16,65 @@ TEST_CASE("HashTable", "[gpu]")
 
     SECTION("Try to retrieve element from empty table")
     {
-        HashTable hash_table(10);
+        //uint32_t num_elements = 10;
+        //HashTable hash_table(num_elements);
+
+        //std::vector<uint32_t> keys = { 42 };
+        //std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+
+        //REQUIRE(retrieved_vals.size() == 1);
+        //REQUIRE(retrieved_vals[0] == static_cast<uint32_t>(mpp::constants::EMPTY));
     }
 
     SECTION("Insert one element")
     {
-        size_t num_elements = 1;
-        HashTable hash_table(num_elements);
+        //uint32_t num_elements = 1;
+        //HashTable hash_table(num_elements);
 
-        std::vector<Entry> elements;
-        Entry entry;
-        entry.key = 42;
-        entry.value = 123;
-        elements.push_back(entry);
-        hash_table.Insert(elements);
+        //std::vector<Entry> elements;
+        //Entry entry;
+        //entry.key = 42;
+        //entry.value = 123;
+        //elements.push_back(entry);
+        //hash_table.Insert(elements);
     }
 
     SECTION("Retrieve one element")
     {
-        size_t num_elements = 1;
+        uint32_t num_elements = 1;
         HashTable hash_table(num_elements);
+
+        std::vector<uint32_t> keys = { 1 };
+        std::vector<uint32_t> values = { 2 };
+        hash_table.Insert(keys, values);
+
+        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+
+        REQUIRE(retrieved_vals.size() == 1);
+        REQUIRE(retrieved_vals == values);
     }
 
     SECTION("Insert thousand elements")
     {
-        size_t num_elements = 1000;
+        uint32_t num_elements = 1000;
         HashTable hash_table(num_elements);
     }
 
     SECTION("Retrieve thousand elements")
     {
-        size_t num_elements = 1000;
+        uint32_t num_elements = 1000;
         HashTable hash_table(num_elements);
     }
 
     SECTION("Insert a million elements")
     {
-        size_t num_elements = 1'000'000;
+        uint32_t num_elements = 1'000'000;
         HashTable hash_table(num_elements);
     }
 
     SECTION("Retrieve a million elements")
     {
-        size_t num_elements = 1'000'000;
+        uint32_t num_elements = 1'000'000;
         HashTable hash_table(num_elements);
     }
 }

@@ -27,20 +27,18 @@ typedef unsigned long		uint64_t;
 #define PARAM_IDX_TABLESIZE			9
 
 #define GET_KEY(entry) ( (uint32_t)((entry) >> 32) )
-
 #define MAKE_ENTRY(key,value) ( (((uint64_t)key) << 32) + (value) )
 #define HASH_FUNCTION(key, a, b, table_size) ( (a * key + b) % HASH_P % table_size  )
 
-__kernel void Insert(__global int64_t* key_val_pairs, __global int64_t* table, __constant uint32_t* params, __global uint8_t* out_status)
+__kernel void Insert(__global uint32_t* keys, __global uint32_t* values, __global uint64_t* table, __constant uint32_t* params, __global uint32_t* out_status)
 {
 	int32_t global_id = get_global_id(0);
 	int32_t local_id = get_local_id(0);
 	int32_t group_id = get_group_id(0);
 
-	// Load up the key value pair into a 64 bit entry.
-	uint64_t key_val_pair = key_val_pairs[global_id];
-	uint32_t key = key_val_pair >> 32;
-	uint32_t value = key_val_pair;
+	// Load up the key value pair into a 64 bit int.
+	uint32_t key = keys[global_id];
+	uint32_t value = values[global_id];
 	uint64_t entry = MAKE_ENTRY(key, value);
 
 	if (key == KEY_EMPTY)
@@ -60,7 +58,6 @@ __kernel void Insert(__global int64_t* key_val_pairs, __global int64_t* table, _
 	
 		if (key == KEY_EMPTY) 
 		{
-			key_val_pairs[global_id] = STATUS_ERROR;
 			return;
 		}
 	
@@ -90,56 +87,60 @@ __kernel void Insert(__global int64_t* key_val_pairs, __global int64_t* table, _
 	}
 
 	// The eviction chain was too long; report the failure.
-	key_val_pairs[global_id] = STATUS_ERROR;
+	keys[global_id] = STATUS_ERROR;
 }
 
-__kernel void Retrieve(__global int64_t* table, __global int64_t* key_val_pairs, __constant uint32_t* params)
+__kernel void Retrieve(__global int32_t* keys, __global int64_t* table, __constant uint32_t* params)
 {
 	int32_t global_id = get_global_id(0);
 	int32_t local_id = get_local_id(0);
 	int32_t group_id = get_group_id(0);
 
-	uint32_t key = key_val_pairs[global_id] << 32;
+	uint32_t key = keys[global_id];
+	if (key == KEY_EMPTY)
+	{
+		return;
+	}
 
 	// Cycle through all potential locations in hash table and check if requested key exists
 	uint32_t location = HASH_FUNCTION(key, params[PARAM_IDX_HASH_FUNC_A_0], params[PARAM_IDX_HASH_FUNC_B_0], params[PARAM_IDX_TABLESIZE]);
 	uint64_t key_val_pair = table[location];
-	uint32_t found_key = key_val_pair << 32;
+	uint32_t found_key = GET_KEY(key_val_pair);
 	if (found_key == key)
 	{
-		key_val_pairs[global_id] = key_val_pair;
+		keys[global_id] = (uint32_t) key_val_pair;
 		return;
 	}
 
 	location = HASH_FUNCTION(key, params[PARAM_IDX_HASH_FUNC_A_1], params[PARAM_IDX_HASH_FUNC_B_1], params[PARAM_IDX_TABLESIZE]);
 	key_val_pair = table[location];
-	found_key = key_val_pair << 32;
+	found_key = GET_KEY(key_val_pair);
 	if (found_key == key)
 	{
-		key_val_pairs[global_id] = key_val_pair;
+		keys[global_id] = (uint32_t) key_val_pair;
 		return;
 	}
 
 	location = HASH_FUNCTION(key, params[PARAM_IDX_HASH_FUNC_A_2], params[PARAM_IDX_HASH_FUNC_B_2], params[PARAM_IDX_TABLESIZE]);
 	key_val_pair = table[location];
-	found_key = key_val_pair << 32;
+	found_key = GET_KEY(key_val_pair);
 	if (found_key == key)
 	{
-		key_val_pairs[global_id] = key_val_pair;
+		keys[global_id] = (uint32_t) key_val_pair;
 		return;
 	}
 
 	location = HASH_FUNCTION(key, params[PARAM_IDX_HASH_FUNC_A_3], params[PARAM_IDX_HASH_FUNC_B_3], params[PARAM_IDX_TABLESIZE]);
 	key_val_pair = table[location];
-	found_key = key_val_pair << 32;
+	found_key = GET_KEY(key_val_pair);
 	if (found_key == key)
 	{
-		key_val_pairs[global_id] = key_val_pair;
+		keys[global_id] = (uint32_t) key_val_pair;
 		return;
 	}
 
 	// Did not find the requested key
-	key_val_pairs[global_id] = KEY_EMPTY;
+	keys[global_id] = KEY_EMPTY;
 }
 
 

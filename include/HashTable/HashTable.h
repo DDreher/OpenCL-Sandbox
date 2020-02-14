@@ -4,26 +4,15 @@
 #include <CL\cl.h>
 #include "Base/Definitions.h"
 
-union Entry
-{
-    struct
-    {
-        uint32_t key : 32;
-        uint32_t value : 32;
-    };
-
-    uint64_t data;
-};
-
 class HashTable
 {
 public:
-    HashTable(size_t size);
+    HashTable(uint32_t size);
     ~HashTable();
 
     void Init(uint32_t table_size);
-    bool Insert(const std::vector<Entry>& elements);
-    Entry Get(const std::vector<uint32_t>& keys);
+    bool Insert(const std::vector<uint32_t>& keys, const std::vector<uint32_t>& values);
+    std::vector<uint32_t> Get(const std::vector<uint32_t>& keys);
 
 private:
     void GenerateParams();
