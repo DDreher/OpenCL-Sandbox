@@ -22,6 +22,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Base", "Base\Base.vcxproj", "{52AEC943-9DA4-4FC3-86E0-130C19E9B731}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HashTable_Test", "HashTable_Test\HashTable_Test.vcxproj", "{DEE6F464-6E4F-45F0-89A2-593CF532EDFA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{144332F0-8A37-4DB4-A890-2C93AE0AC37F} = {144332F0-8A37-4DB4-A890-2C93AE0AC37F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

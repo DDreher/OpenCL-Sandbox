@@ -23,6 +23,13 @@ TEST_CASE("HashTable", "[gpu]")
     {
         size_t num_elements = 1;
         HashTable hash_table(num_elements);
+
+        std::vector<Entry> elements;
+        Entry entry;
+        entry.key = 42;
+        entry.value = 123;
+        elements.push_back(entry);
+        hash_table.Insert(elements);
     }
 
     SECTION("Retrieve one element")
@@ -40,6 +47,18 @@ TEST_CASE("HashTable", "[gpu]")
     SECTION("Retrieve thousand elements")
     {
         size_t num_elements = 1000;
+        HashTable hash_table(num_elements);
+    }
+
+    SECTION("Insert a million elements")
+    {
+        size_t num_elements = 1'000'000;
+        HashTable hash_table(num_elements);
+    }
+
+    SECTION("Retrieve a million elements")
+    {
+        size_t num_elements = 1'000'000;
         HashTable hash_table(num_elements);
     }
 }

@@ -23,6 +23,8 @@ namespace mpp
     {
         static constexpr size_t MAX_THREADS_PER_CU = 256;   // Just an assumption for academic purposes. Real value depends on device!
         static constexpr std::array<cl_int, MAX_THREADS_PER_CU> ZEROS = std::array<cl_int, MAX_THREADS_PER_CU>();
+        static constexpr size_t WAVEFRONT_SIZE = 32;
+        static constexpr uint64_t EMPTY = -1;
     };
 
     enum ReturnCode
