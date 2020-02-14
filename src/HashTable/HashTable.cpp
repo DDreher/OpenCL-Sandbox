@@ -7,6 +7,12 @@
 HashTable::HashTable(size_t size) : size_(size)
 {
     Init(size);
+
+    /* initialize random seed: */
+    srand(42);
+    
+    params.resize(NUM_PARAMS);
+    GenerateParams();
 }
 
 HashTable::~HashTable()
@@ -17,7 +23,7 @@ HashTable::~HashTable()
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 }
 
-void HashTable::Init(size_t table_size)
+void HashTable::Init(uint32_t table_size)
 {
     OpenCLManager* mgr = OpenCLManager::GetInstance();
     assert(mgr != nullptr);
@@ -83,32 +89,81 @@ bool HashTable::Insert(const std::vector<Entry>& elements)
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
     }
 
-    // 3. Run kernel    
-    const cl_kernel kernel_hashtable_insert = mgr->kernel_map[mpp::kernels::HASHTABLE_INSERT];
-    //status = clSetKernelArg(kernel_prefix_scan, 0, sizeof(cl_mem), (void*)&a_buffer);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    //status = clSetKernelArg(kernel_prefix_scan, 1, sizeof(cl_mem), (void*)&b_buffer);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    //status = clSetKernelArg(kernel_prefix_scan, 2, sizeof(cl_mem), (void*)&c_buffer);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    // 3. Construct parameters buffer
+    cl_mem params_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, params.size() * sizeof(uint32_t), NULL, NULL);
+    status = clEnqueueWriteBuffer(mgr->command_queue, key_val_buffer, CL_TRUE, 0, params.size() * sizeof(uint32_t), params.data(), 0, NULL, NULL);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-    //size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
-    //size_t local_work_size[1] = { static_cast<size_t>(mpp::constants::MAX_THREADS_PER_CU) };
-    //status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_hashtable_insert, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    // 4. Construct status buffer
+    cl_mem status_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, sizeof(uint32_t), NULL, NULL);
+    int intital_status = 0;
+    status = clEnqueueWriteBuffer(mgr->command_queue, key_val_buffer, CL_TRUE, 0, sizeof(uint32_t), &intital_status, 0, NULL, NULL);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+
+    // 5. Run kernel    
+    const cl_kernel kernel_hashtable_insert = mgr->kernel_map[mpp::kernels::HASHTABLE_INSERT];
+    // args: __global int64_t* key_val_pairs, __global int64_t* table, __constant uint32_t* params, __global uint8_t* out_status
+    status = clSetKernelArg(kernel_hashtable_insert, 0, sizeof(cl_mem), (void*)&key_val_buffer);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clSetKernelArg(kernel_hashtable_insert, 1, sizeof(cl_mem), (void*)&table_buffer_);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clSetKernelArg(kernel_hashtable_insert, 2, sizeof(cl_mem), (void*)&params_buffer);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clSetKernelArg(kernel_hashtable_insert, 3, sizeof(cl_mem), (void*)&status_buffer);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+
+    size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
+    size_t local_work_size[1] = { std::min(static_cast<size_t>(THREAD_BLOCK_SIZE), static_cast<size_t>(next_multiple)) };
+    status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_hashtable_insert, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // TODO: Error checking (collisions) -> Reconstruction
 
-    // 4. Cleanup -> Release buffers
+    // 6. Cleanup -> Release buffers
     status = clReleaseMemObject(key_val_buffer);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clReleaseMemObject(params_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     
     return status == mpp::ReturnCode::CODE_SUCCESS;
 }
 
-Entry Get(const std::vector<int32_t>& keys)
+Entry HashTable::Get(const std::vector<uint32_t>& keys)
 {
-    // TODO
-
     return Entry();
+}
+
+void HashTable::GenerateParams()
+{
+    params.clear();
+
+    //PARAM_IDX_HASHFUNC_A_0   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_B_0   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_A_1   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_B_1   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_A_2   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_B_2   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_A_3   
+    params.push_back(rand());
+
+    //PARAM_IDX_HASHFUNC_B_3   
+    params.push_back(rand());
+
+    //PARAM_IDX_MAX_ITERATIONS 
+    params.push_back(max_iterations);
+    
+    //PARAM_IDX_TABLESIZE      
+    params.push_back(size_);
 }
