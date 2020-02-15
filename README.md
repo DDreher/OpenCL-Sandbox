@@ -1,8 +1,10 @@
 
 # Overview
 
-This repository contains an OpenCL implementation of both a Prefix Scan and a Cuckoo Hash.
-The implementations are for personal educational purposes only. It's not adviced to use them in any production environment.
+This repository represents my personal Sandbox to play around with heterogenous parallel computing algorithms and techniques.
+Right now it contains an OpenCL implementation of both a Prefix Scan and a Cuckoo Hash.
+
+**Disclaimer: The implementations are for personal educational purposes only. It's not adviced to use them in any production environment.**
 
 # How to build
 
