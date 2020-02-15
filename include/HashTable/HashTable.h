@@ -13,7 +13,7 @@ public:
     bool Init(uint32_t table_size);
     bool Init(uint32_t table_size, const std::vector<uint32_t>& keys, const std::vector<uint32_t>& values);
     bool Insert(const std::vector<uint32_t>& keys, const std::vector<uint32_t>& values);
-    std::vector<uint32_t> Get(const std::vector<uint32_t>& keys);
+    std::vector<uint32_t> Retrieve(const std::vector<uint32_t>& keys);
 
     uint32_t max_iterations = 8;
     uint32_t max_reconstructions = 3;

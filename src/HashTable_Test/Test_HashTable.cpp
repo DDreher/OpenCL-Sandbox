@@ -22,7 +22,7 @@ TEST_CASE("HashTable", "[gpu]")
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()));
         REQUIRE(success == true);
 
-        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        std::vector<uint32_t> retrieved_vals = hash_table.Retrieve(keys);
         REQUIRE(retrieved_vals.size() == keys.size());
         REQUIRE(retrieved_vals[0] == static_cast<uint32_t>(mpp::constants::EMPTY));
     }
@@ -35,7 +35,7 @@ TEST_CASE("HashTable", "[gpu]")
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()));
         REQUIRE(success == true);
 
-        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        std::vector<uint32_t> retrieved_vals = hash_table.Retrieve(keys);
         REQUIRE(retrieved_vals.size() == keys.size());
         for(auto val : retrieved_vals)
         {
@@ -62,7 +62,7 @@ TEST_CASE("HashTable", "[gpu]")
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
         REQUIRE(success == true);
 
-        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        std::vector<uint32_t> retrieved_vals = hash_table.Retrieve(keys);
         REQUIRE(retrieved_vals.size() == keys.size());
         REQUIRE(retrieved_vals == values);
     }
@@ -75,7 +75,7 @@ TEST_CASE("HashTable", "[gpu]")
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
         REQUIRE(success == true);
 
-        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        std::vector<uint32_t> retrieved_vals = hash_table.Retrieve(keys);
         REQUIRE(retrieved_vals.size() == keys.size());
         REQUIRE(retrieved_vals == values);
     }
@@ -169,7 +169,7 @@ TEST_CASE("HashTable", "[gpu]")
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
         REQUIRE(success == true);
 
-        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        std::vector<uint32_t> retrieved_vals = hash_table.Retrieve(keys);
         REQUIRE(retrieved_vals.size() == keys.size());
         REQUIRE(retrieved_vals == values);
     }

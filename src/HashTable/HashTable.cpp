@@ -164,7 +164,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     return kernel_status == mpp::ReturnCode::CODE_SUCCESS;
 }
 
-std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
+std::vector<uint32_t> HashTable::Retrieve(const std::vector<uint32_t>& keys)
 {
     OpenCLManager* mgr = OpenCLManager::GetInstance();
     assert(mgr != nullptr);
