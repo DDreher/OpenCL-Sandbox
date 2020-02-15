@@ -173,7 +173,7 @@ std::vector<uint32_t> HashTable::Retrieve(const std::vector<uint32_t>& keys)
     // 1. Allocate GPU memory
     cl_int next_multiple = static_cast<cl_int>(
         Utility::GetNextMultipleOf(static_cast<uint32_t>(keys.size()), static_cast<uint32_t>(mpp::constants::WAVEFRONT_SIZE)));
-    cl_mem keys_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint32_t), NULL, NULL);
+    cl_mem keys_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, next_multiple * sizeof(uint32_t), NULL, NULL);
     cl_mem vals_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint32_t), NULL, NULL);
 
     // 2. Fill buffer
