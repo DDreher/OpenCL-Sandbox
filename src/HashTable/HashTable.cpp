@@ -120,7 +120,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clSetKernelArg(kernel_hashtable_insert, 3, sizeof(cl_mem), (void*)&params_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clSetKernelArg(kernel_hashtable_insert, 4, sizeof(cl_mem), (void*)&params_buffer);
+    status = clSetKernelArg(kernel_hashtable_insert, 4, sizeof(cl_mem), (void*)&status_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
@@ -139,7 +139,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     //assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     uint32_t kernel_status = mpp::ReturnCode::CODE_SUCCESS;
-    status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, sizeof(uint32_t), &kernel_status, 0, NULL, NULL);
+    status = clEnqueueReadBuffer(mgr->command_queue, status_buffer, CL_TRUE, 0, sizeof(uint32_t), &kernel_status, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // 6. Cleanup -> Release buffers
