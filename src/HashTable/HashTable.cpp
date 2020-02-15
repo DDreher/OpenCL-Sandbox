@@ -7,7 +7,7 @@
 HashTable::HashTable()
 {
     // Init random seed
-    srand(42);
+    srand(random_seed_);
 }
 
 HashTable::~HashTable()
@@ -236,38 +236,16 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
 
 void HashTable::GenerateParams()
 {
-    params_.resize(NUM_PARAMS);
-    params_.clear();
-
-    //PARAM_IDX_HASHFUNC_A_0   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_B_0   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_A_1   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_B_1   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_A_2   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_B_2   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_A_3   
-    params_.push_back(rand());
-
-    //PARAM_IDX_HASHFUNC_B_3   
-    params_.push_back(rand());
-
-    //PARAM_IDX_MAX_ITERATIONS 
-    params_.push_back(max_iterations);
-    
-    //PARAM_IDX_TABLESIZE      
-    params_.push_back(size_);
+    params_[PARAM_IDX_HASHFUNC_A_0] = rand();
+    params_[PARAM_IDX_HASHFUNC_B_0] = rand();
+    params_[PARAM_IDX_HASHFUNC_A_1] = rand();
+    params_[PARAM_IDX_HASHFUNC_B_1] = rand();
+    params_[PARAM_IDX_HASHFUNC_A_2] = rand();
+    params_[PARAM_IDX_HASHFUNC_B_2] = rand();
+    params_[PARAM_IDX_HASHFUNC_A_3] = rand();
+    params_[PARAM_IDX_HASHFUNC_B_3] = rand();
+    params_[PARAM_IDX_MAX_ITERATIONS] = max_iterations;
+    params_[PARAM_IDX_TABLESIZE] = size_;
 
     OpenCLManager* mgr = OpenCLManager::GetInstance();
     assert(mgr != nullptr);

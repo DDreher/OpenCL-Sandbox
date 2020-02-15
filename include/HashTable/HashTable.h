@@ -29,6 +29,7 @@ private:
 
     // parameters
     uint32_t size_ = 0;
+    uint32_t random_seed_ = 42;
 
     const uint32_t NUM_PARAMS = 10;
     size_t PARAM_IDX_HASHFUNC_A_0 = 0;
@@ -41,5 +42,5 @@ private:
     size_t PARAM_IDX_HASHFUNC_B_3 = 7;
     size_t PARAM_IDX_MAX_ITERATIONS = 8;
     size_t PARAM_IDX_TABLESIZE = 9;
-    std::vector<uint32_t> params_;
+    std::vector<uint32_t> params_ = std::vector<uint32_t>(NUM_PARAMS, 0);
 };
