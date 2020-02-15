@@ -33,7 +33,7 @@ The solution's paths are already set up relative to environment variables.
 The development environment relies on NVidia GPUs, therefore the OpenCL path depends on $(CUDA_PATH).    
 If you use an AMD GPU or don't have this environment variable set you have to adjust the build properties of each project.
 
-*IMPORTANT:*    
+**IMPORTANT:**    
 If you don't want to copy the kernel implementations (.cl files) into the build directory to debug / execute the unit tests it's recommended to set the 
 working directory in the build properties of the Visual Studio projects under Configuration Properties -> Debugging -> Working Directory to $(ProjectDir).
 Sadly this seems to be a local setting and can't be commited to the repository.
