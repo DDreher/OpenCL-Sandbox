@@ -15,7 +15,7 @@ Reference: https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/c
 
 # PrefixScan_Test
 
-Contains test and performance comparisons of the PrefixScan algorithms. Tests are implemented with Catch22.
+Contains test and performance comparisons of the PrefixScan algorithms.
 
 # HashTable
 
@@ -25,4 +25,19 @@ Reference: https://www.researchgate.net/publication/211178395_Building_an_Effici
 
 # HashTable_Test
 
-Contains test and performance comparisons of the Cuckoo Hash implementation. For comparison with the host a std::unordered_map is used. Tests are implemented with Catch22.
+Contains test and performance comparisons of the Cuckoo Hash implementation. For comparison with the host a std::unordered_map is used.
+
+# How to build
+
+The solution's paths are already set up relative to environment variables.    
+The development environment relies on NVidia GPUs, therefore the OpenCL path depends on $(CUDA_PATH).    
+If you use an AMD GPU or don't have this environment variable set you have to adjust the build properties of each project.
+
+*IMPORTANT:*    
+If you don't want to copy the kernel implementations (.cl files) into the build directory to debug / execute the unit tests it's recommended to set the 
+working directory in the build properties of the Visual Studio projects under Configuration Properties -> Debugging -> Working Directory to $(ProjectDir).
+Sadly this seems to be a local setting and can't be commited to the repository.
+
+# Third Party Dependencies
+
+Catch2 - https://github.com/catchorg/Catch2
