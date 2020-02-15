@@ -2,6 +2,7 @@
 # Overview
 
 This repository contains an OpenCL implementation of both a Prefix Scan and a Cuckoo Hash.
+The implementations are for personal educational purposes only. It's not adviced to use them in any production environment.
 
 # How to build
 
