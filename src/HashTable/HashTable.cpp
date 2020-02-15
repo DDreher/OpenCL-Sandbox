@@ -14,8 +14,17 @@ HashTable::~HashTable()
 {
     // Release buffers
     cl_int status = 0;
-    status = clReleaseMemObject(table_buffer_);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    if(table_buffer_ != 0)
+    {
+        status = clReleaseMemObject(table_buffer_);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    }
+
+    if (params_buffer_ != 0)
+    {
+        status = clReleaseMemObject(params_buffer_);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    }
 }
 
 bool HashTable::Init(uint32_t table_size)
@@ -101,18 +110,13 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
     }
 
-    // 3. Construct parameters buffer
-    cl_mem params_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, params_.size() * sizeof(uint32_t), NULL, NULL);
-    status = clEnqueueWriteBuffer(mgr->command_queue, params_buffer, CL_TRUE, 0, params_.size() * sizeof(uint32_t), params_.data(), 0, NULL, NULL);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
-    // 4. Construct status buffer
+    // 3. Construct status buffer
     cl_mem status_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, sizeof(uint32_t), NULL, NULL);
     int intital_status = 0;
     status = clEnqueueWriteBuffer(mgr->command_queue, status_buffer, CL_TRUE, 0, sizeof(uint32_t), &intital_status, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-    // 5. Run kernel    
+    // 4. Run kernel    
     const cl_kernel kernel_hashtable_insert = mgr->kernel_map[mpp::kernels::HASHTABLE_INSERT];
     // args: __global uint32_t* keys, __global uint32_t* values, __global uint64_t* table, __constant uint32_t* params, __global uint32_t* out_status
     status = clSetKernelArg(kernel_hashtable_insert, 0, sizeof(cl_mem), (void*)&keys_buffer);
@@ -121,7 +125,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clSetKernelArg(kernel_hashtable_insert, 2, sizeof(cl_mem), (void*)&table_buffer_);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clSetKernelArg(kernel_hashtable_insert, 3, sizeof(cl_mem), (void*)&params_buffer);
+    status = clSetKernelArg(kernel_hashtable_insert, 3, sizeof(cl_mem), (void*)&params_buffer_);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clSetKernelArg(kernel_hashtable_insert, 4, sizeof(cl_mem), (void*)&status_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
@@ -131,11 +135,10 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     status = clEnqueueNDRangeKernel(mgr->command_queue, kernel_hashtable_insert, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-    // 7. Error checking - Check if max iterations have been exceeded
-    // Thoughts on error handling for insertions after the initial insertion: In theory we could check which elements failed to be inserted,
-    // Take the original state of the hashtable, generate new hash parameters and then reconstruct the hashtable
-    // from scratch.
-    // This would not help in case we exceeded VRAM though..
+    // 5. Error checking - Check if max iterations have been exceeded
+    // In theory we could check which elements failed to be inserted, then take the original state of the hashtable, generate new hash parameters and then reconstruct the hashtable
+    // from scratch. There probably are elements left which could not be inserted due to collision though...
+    // For now it's assumed that insert is only called once.
 
     uint32_t kernel_status = mpp::ReturnCode::CODE_SUCCESS;
     status = clEnqueueReadBuffer(mgr->command_queue, status_buffer, CL_TRUE, 0, sizeof(uint32_t), &kernel_status, 0, NULL, NULL);
@@ -147,10 +150,8 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     //    std::vector<uint32_t> status_per_element(next_multiple);
     //    status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), status_per_element.data(), 0, NULL, NULL);
     //    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
     //    // Assume that 0 and 1 are never used as keys for debug purposes
     //    uint32_t num_unresolved_collisions = static_cast<uint32_t>(std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR));
-
     //    std::cout << "Host Table construction iteration: " << current_iteration_ << " Num unresolved collisions: " << num_unresolved_collisions << std::endl;
     //}
 
@@ -158,8 +159,6 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     status = clReleaseMemObject(keys_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clReleaseMemObject(values_buffer);
-    assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clReleaseMemObject(params_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clReleaseMemObject(status_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
@@ -269,4 +268,18 @@ void HashTable::GenerateParams()
     
     //PARAM_IDX_TABLESIZE      
     params_.push_back(size_);
+
+    OpenCLManager* mgr = OpenCLManager::GetInstance();
+    assert(mgr != nullptr);
+    cl_int status = 0;
+
+    if (params_buffer_ != 0)
+    {
+        status = clReleaseMemObject(params_buffer_);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    }
+
+    params_buffer_ = clCreateBuffer(mgr->context, CL_MEM_READ_ONLY, params_.size() * sizeof(uint32_t), NULL, NULL);
+    status = clEnqueueWriteBuffer(mgr->command_queue, params_buffer_, CL_TRUE, 0, params_.size() * sizeof(uint32_t), params_.data(), 0, NULL, NULL);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
 }
