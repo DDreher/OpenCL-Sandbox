@@ -145,7 +145,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // Assume that 0 and 1 are never used as keys for debug purposes
-        uint32_t num_unresolved_collisions = std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR);
+        uint32_t num_unresolved_collisions = static_cast<uint32_t>(std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR));
         std::cout << "Host Table construction iteration: " << current_iteration_ << " Num unresolved collisions: " << num_unresolved_collisions << std::endl;
     }
 
