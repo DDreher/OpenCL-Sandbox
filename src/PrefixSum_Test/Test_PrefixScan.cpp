@@ -434,7 +434,7 @@ TEST_CASE("PrefixSum GPU", "[gpu]")
 
     SECTION("size == 100'000'000")
     {
-        std::cout << "--------------- PrefixScan - 10'000'000 elements --------------- " << std::endl;
+        std::cout << "--------------- PrefixScan - 100'000'000 elements --------------- " << std::endl;
         size_t size = 100'000'000;
         // Fill input elements and expected output elements 
         for (cl_int i = 0; i < size; ++i)
