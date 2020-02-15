@@ -23,6 +23,7 @@ private:
     void GenerateParams();
 
     cl_mem table_buffer_ = 0;
+    uint32_t current_iteration_ = 0;
     const uint32_t THREAD_BLOCK_SIZE = 64;
 
     // parameters

@@ -48,10 +48,9 @@ bool HashTable::Init(uint32_t table_size)
 bool HashTable::Init(uint32_t table_size, const std::vector<uint32_t>& keys, const std::vector<uint32_t>& values)
 {
     bool success = false;
-    for(uint32_t i=0; i<max_reconstructions; ++i)
+    for(current_iteration_ = 0; current_iteration_ < max_reconstructions; ++current_iteration_)
     {
         Init(table_size);
-
         success = Insert(keys, values);
 
         if(success)
@@ -134,13 +133,21 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     // from scratch.
     // This would not help in case we exceeded VRAM though..
 
-    //std::vector<uint32_t> kernel_status(next_multiple);
-    //status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), kernel_status.data(), 0, NULL, NULL);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
-
     uint32_t kernel_status = mpp::ReturnCode::CODE_SUCCESS;
     status = clEnqueueReadBuffer(mgr->command_queue, status_buffer, CL_TRUE, 0, sizeof(uint32_t), &kernel_status, 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
+
+    // DEBUG - Check which/how many elements failed to be inserted
+    if(kernel_status != mpp::ReturnCode::CODE_SUCCESS)
+    {
+        std::vector<uint32_t> status_per_element(next_multiple);
+        status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), status_per_element.data(), 0, NULL, NULL);
+        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+
+        // Assume that 0 and 1 are never used as keys for debug purposes
+        uint32_t num_unresolved_collisions = std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR);
+        std::cout << "Host Table construction iteration: " << current_iteration_ << " Num unresolved collisions: " << num_unresolved_collisions << std::endl;
+    }
 
     // 6. Cleanup -> Release buffers
     status = clReleaseMemObject(keys_buffer);
