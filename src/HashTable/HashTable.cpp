@@ -37,17 +37,14 @@ bool HashTable::Init(uint32_t table_size)
     cl_int status = 0;
 
     // 1. Allocate enough memory on GPU to fit hash table, padded to wavefront size
-    cl_int next_multiple = static_cast<cl_int>(
-        Utility::GetNextMultipleOf(static_cast<uint32_t>(size_), static_cast<uint32_t>(mpp::constants::WAVEFRONT_SIZE)));
-
     if(table_buffer_ == 0)
     {
-        table_buffer_ = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint64_t), NULL, NULL);
+        table_buffer_ = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, size_ * sizeof(uint64_t), NULL, NULL);
     }
 
     // 2. Initialize all the memory with empty elements
-    std::vector<uint64_t> empty_elements(next_multiple, mpp::constants::EMPTY);
-    status = clEnqueueWriteBuffer(mgr->command_queue, table_buffer_, CL_TRUE, 0, next_multiple * sizeof(uint64_t), empty_elements.data(), 0, NULL, NULL);
+    std::vector<uint64_t> empty_elements(size_, mpp::constants::EMPTY);
+    status = clEnqueueWriteBuffer(mgr->command_queue, table_buffer_, CL_TRUE, 0, size_ * sizeof(uint64_t), empty_elements.data(), 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     return status == mpp::ReturnCode::CODE_SUCCESS;
