@@ -45,7 +45,7 @@ TEST_CASE("HashTable", "[gpu]")
 
     SECTION("Insert one element")
     {
-        std::vector<uint32_t> keys = { 1 };
+        std::vector<uint32_t> keys = { 42 };
         std::vector<uint32_t> values = { 123 };
 
         HashTable hash_table;
@@ -83,173 +83,94 @@ TEST_CASE("HashTable", "[gpu]")
     SECTION("Insert 100, size_factor=4.0, max_reconstructions=10, max_iterations=7*log(N)")
     {
         uint32_t num_elements = 100;
-        std::vector<uint32_t> keys;
-        std::vector<uint32_t> values;
+        std::vector<uint32_t> keys(num_elements);
+        std::vector<uint32_t> values(num_elements);
 
         for (uint32_t i = 0; i < num_elements; ++i)
         {
-            keys.push_back(i+2);
-            values.push_back(i+3);
+            keys[i] = (i + 2);
+            values[i] = (i + 3);
         }
 
         HashTable hash_table;
-        hash_table.table_size_factor = 100.0f;
+        hash_table.table_size_factor = 4.0f;
         hash_table.max_reconstructions = 10;
         hash_table.max_iterations = 7 * static_cast<uint32_t>(log(num_elements));
         bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
         REQUIRE(success == true);
     }
 
-    //SECTION("Insert thousand elements")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
+    SECTION("Insert 1000 elements")
+    {
+        uint32_t num_elements = 1000;
+        std::vector<uint32_t> keys(num_elements);
+        std::vector<uint32_t> values(num_elements);
 
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
+        for (uint32_t i = 0; i < num_elements; ++i)
+        {
+            keys[i] = (i + 2);
+            values[i] = (i + 3);
+        }
 
-    //    HashTable hash_table;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
+        HashTable hash_table;
+        bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
+        REQUIRE(success == true);
+    }
 
-    //SECTION("Retrieve thousand elements")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
+    SECTION("Insert a million elements")
+    {
+        uint32_t num_elements = 1'000'000;
+        std::vector<uint32_t> keys(num_elements);
+        std::vector<uint32_t> values(num_elements);
 
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
+        for (uint32_t i = 0; i < num_elements; ++i)
+        {
+            keys[i] = (i + 2);
+            values[i] = (i + 3);
+        }
 
-    //    HashTable hash_table;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
+        HashTable hash_table;
+        bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
+        REQUIRE(success == false); // This should fail, the table can not be constructed without collisions
+    }
 
-    //    std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
-    //    REQUIRE(retrieved_vals.size() == keys.size());
-    //    REQUIRE(retrieved_vals == values);
-    //}
+    SECTION("Insert a million elements, max_iterations=7*log(N)")
+    {
+        uint32_t num_elements = 1'000'000;
+        std::vector<uint32_t> keys(num_elements);
+        std::vector<uint32_t> values(num_elements);
 
-    //SECTION("Insert thousand elements, size_factor=1.5")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
+        for (uint32_t i = 0; i < num_elements; ++i)
+        {
+            keys[i] = (i + 2);
+            values[i] = (i + 3);
+        }
 
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
+        HashTable hash_table;
+        hash_table.max_iterations = 7 * static_cast<uint32_t>(log(num_elements));
+        bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
+        REQUIRE(success == true); // Increasing the number of possible evictions before abort leads to a successful hash table insertion
+    }
 
-    //    HashTable hash_table;
-    //    hash_table.table_size_factor = 1.5f;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
+    SECTION("Retrieve a million elements, max_iterations=7*log(N)")
+    {
+        uint32_t num_elements = 1'000'000;
+        std::vector<uint32_t> keys(num_elements);
+        std::vector<uint32_t> values(num_elements);
 
-    //SECTION("Insert thousand elements, size_factor=1.5, max_reconstructions=10")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
+        for (uint32_t i = 0; i < num_elements; ++i)
+        {
+            keys[i] = (i + 2);
+            values[i] = (i + 3);
+        }
 
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
+        HashTable hash_table;
+        hash_table.max_iterations = 7 * static_cast<uint32_t>(log(num_elements));
+        bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
+        REQUIRE(success == true);
 
-    //    HashTable hash_table;
-    //    hash_table.table_size_factor = 1.5f;
-    //    hash_table.max_reconstructions = 10;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
-
-    //SECTION("Insert thousand elements, size_factor=2.0, max_reconstructions=10, max_iterations=16")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
-
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
-
-    //    HashTable hash_table;
-    //    hash_table.table_size_factor = 2.0f;
-    //    hash_table.max_reconstructions = 10;
-    //    hash_table.max_iterations = 16;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
-
-    //SECTION("Insert thousand elements, size_factor=1.25, max_reconstructions=10, max_iterations=7*log(N)")
-    //{
-    //    uint32_t num_elements = 1000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
-
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
-
-    //    HashTable hash_table;
-    //    hash_table.table_size_factor = 4.0f;
-    //    hash_table.max_reconstructions = 10;
-    //    hash_table.max_iterations = 7 * static_cast<uint32_t>(log(num_elements));
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
-
-    //SECTION("Insert a million elements")
-    //{
-    //    uint32_t num_elements = 1'000'000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
-
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
-
-    //    HashTable hash_table;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-    //}
-
-    //SECTION("Retrieve a million elements")
-    //{
-    //    uint32_t num_elements = 1'000'000;
-    //    std::vector<uint32_t> keys;
-    //    std::vector<uint32_t> values;
-
-    //    for (uint32_t i = 0; i < num_elements; ++i)
-    //    {
-    //        keys.push_back(i+2);
-    //        values.push_back(i+3);
-    //    }
-
-    //    HashTable hash_table;
-    //    bool success = hash_table.Init(static_cast<uint32_t>(keys.size()), keys, values);
-    //    REQUIRE(success == true);
-
-    //    std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
-    //    REQUIRE(retrieved_vals.size() == keys.size());
-    //    REQUIRE(retrieved_vals == values);
-    //}
+        std::vector<uint32_t> retrieved_vals = hash_table.Get(keys);
+        REQUIRE(retrieved_vals.size() == keys.size());
+        REQUIRE(retrieved_vals == values);
+    }
 }

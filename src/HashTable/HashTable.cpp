@@ -29,7 +29,7 @@ bool HashTable::Init(uint32_t table_size)
 
     // 1. Allocate enough memory on GPU to fit hash table, padded to wavefront size
     cl_int next_multiple = static_cast<cl_int>(
-        Utility::GetNextMultipleOf(static_cast<uint32_t>(table_size), static_cast<uint32_t>(mpp::constants::WAVEFRONT_SIZE)));
+        Utility::GetNextMultipleOf(static_cast<uint32_t>(size_), static_cast<uint32_t>(mpp::constants::WAVEFRONT_SIZE)));
 
     if(table_buffer_ == 0)
     {
@@ -47,15 +47,19 @@ bool HashTable::Init(uint32_t table_size)
 
 bool HashTable::Init(uint32_t table_size, const std::vector<uint32_t>& keys, const std::vector<uint32_t>& values)
 {
-    bool success = false;
+    bool success = true;
     for(current_iteration_ = 0; current_iteration_ < max_reconstructions; ++current_iteration_)
     {
         Init(table_size);
-        success = Insert(keys, values);
 
-        if(success)
+        if(keys.size() > 0)
         {
-            break;
+            success = Insert(keys, values);
+
+            if(success)
+            {
+                break;
+            }
         }
     }
 
@@ -138,16 +142,17 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // DEBUG - Check which/how many elements failed to be inserted
-    if(kernel_status != mpp::ReturnCode::CODE_SUCCESS)
-    {
-        std::vector<uint32_t> status_per_element(next_multiple);
-        status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), status_per_element.data(), 0, NULL, NULL);
-        assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    //if(kernel_status != mpp::ReturnCode::CODE_SUCCESS)
+    //{
+    //    std::vector<uint32_t> status_per_element(next_multiple);
+    //    status = clEnqueueReadBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), status_per_element.data(), 0, NULL, NULL);
+    //    assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
-        // Assume that 0 and 1 are never used as keys for debug purposes
-        uint32_t num_unresolved_collisions = static_cast<uint32_t>(std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR));
-        std::cout << "Host Table construction iteration: " << current_iteration_ << " Num unresolved collisions: " << num_unresolved_collisions << std::endl;
-    }
+    //    // Assume that 0 and 1 are never used as keys for debug purposes
+    //    uint32_t num_unresolved_collisions = static_cast<uint32_t>(std::count(status_per_element.begin(), status_per_element.end(), mpp::ReturnCode::CODE_ERROR));
+
+    //    std::cout << "Host Table construction iteration: " << current_iteration_ << " Num unresolved collisions: " << num_unresolved_collisions << std::endl;
+    //}
 
     // 6. Cleanup -> Release buffers
     status = clReleaseMemObject(keys_buffer);
@@ -171,10 +176,11 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
     // 1. Allocate GPU memory
     cl_int next_multiple = static_cast<cl_int>(
         Utility::GetNextMultipleOf(static_cast<uint32_t>(keys.size()), static_cast<uint32_t>(mpp::constants::WAVEFRONT_SIZE)));
-    cl_mem key_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint32_t), NULL, NULL);
+    cl_mem keys_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint32_t), NULL, NULL);
+    cl_mem vals_buffer = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, next_multiple * sizeof(uint32_t), NULL, NULL);
 
     // 2. Fill buffer
-    status = clEnqueueWriteBuffer(mgr->command_queue, key_buffer, CL_TRUE, 0, keys.size() * sizeof(uint32_t), keys.data(), 0, NULL, NULL);
+    status = clEnqueueWriteBuffer(mgr->command_queue, keys_buffer, CL_TRUE, 0, keys.size() * sizeof(uint32_t), keys.data(), 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // If necessary write padding
@@ -185,7 +191,7 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
         std::fill(empty_elements.begin(), empty_elements.end(), mpp::constants::EMPTY_32);
         size_t offset = keys.size() * sizeof(uint32_t);
         size_t num_bytes_written = num_padded_elements * sizeof(uint32_t);
-        status = clEnqueueWriteBuffer(mgr->command_queue, key_buffer, CL_TRUE, offset, num_bytes_written, empty_elements.data(), 0, NULL, NULL);
+        status = clEnqueueWriteBuffer(mgr->command_queue, keys_buffer, CL_TRUE, offset, num_bytes_written, empty_elements.data(), 0, NULL, NULL);
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
     }
 
@@ -197,11 +203,13 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
     // 4. invoke retrieve kernel
     const cl_kernel kernel_hashtable_retrieve = mgr->kernel_map[mpp::kernels::HASHTABLE_RETRIEVE];
     // params: __global int32_t* keys, __global int64_t* table, __constant uint32_t* params
-    status = clSetKernelArg(kernel_hashtable_retrieve, 0, sizeof(cl_mem), (void*)&key_buffer);
+    status = clSetKernelArg(kernel_hashtable_retrieve, 0, sizeof(cl_mem), (void*)&keys_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clSetKernelArg(kernel_hashtable_retrieve, 1, sizeof(cl_mem), (void*)&table_buffer_);
+    status = clSetKernelArg(kernel_hashtable_retrieve, 1, sizeof(cl_mem), (void*)&vals_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    status = clSetKernelArg(kernel_hashtable_retrieve, 2, sizeof(cl_mem), (void*)&params_buffer);
+    status = clSetKernelArg(kernel_hashtable_retrieve, 2, sizeof(cl_mem), (void*)&table_buffer_);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clSetKernelArg(kernel_hashtable_retrieve, 3, sizeof(cl_mem), (void*)&params_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
@@ -212,11 +220,13 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
 
     // 5. Read back results
     std::vector<uint32_t> retrieved_entries(next_multiple);
-    status = clEnqueueReadBuffer(mgr->command_queue, key_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), retrieved_entries.data(), 0, NULL, NULL);
+    status = clEnqueueReadBuffer(mgr->command_queue, vals_buffer, CL_TRUE, 0, next_multiple * sizeof(uint32_t), retrieved_entries.data(), 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // 6. Release buffers
-    status = clReleaseMemObject(key_buffer);
+    status = clReleaseMemObject(keys_buffer);
+    assert(status == mpp::ReturnCode::CODE_SUCCESS);
+    status = clReleaseMemObject(vals_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clReleaseMemObject(params_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
