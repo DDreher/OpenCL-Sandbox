@@ -98,8 +98,6 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
     status = clSetKernelArg(kernel_prefix_scan, 2, sizeof(cl_mem), (void*)&c_buffer);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
-    //status = clSetKernelArg(kernel_prefix_scan, 3, sizeof(cl_int), &num_elements);
-    //assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
     // Run prefix scan kernel
     size_t global_work_size[1] = { static_cast<size_t>(next_multiple) };
@@ -151,9 +149,9 @@ void PrefixSum::CalculateGPU_Recursive(cl_mem a_buffer, cl_mem b_buffer, size_t 
         assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // Debug
-        /*std::vector<cl_int> result(num_elements, 0);
-        status = clEnqueueReadBuffer(mgr->command_queue, b_buffer, CL_TRUE, 0, num_elements * sizeof(cl_int), result.data(), 0, NULL, NULL);
-        assert(status == mpp::ReturnCode::CODE_SUCCESS);*/
+        //std::vector<cl_int> result(num_elements, 0);
+        //status = clEnqueueReadBuffer(mgr->command_queue, b_buffer, CL_TRUE, 0, num_elements * sizeof(cl_int), result.data(), 0, NULL, NULL);
+        //assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
         // release buffers
         status = clReleaseMemObject(d_buffer);
