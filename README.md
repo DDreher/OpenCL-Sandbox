@@ -11,7 +11,8 @@ Contains the foundation for the OpenCL implementations and their tests. Most imp
 
 Contains a Blelloch Scan implementation for both host and device for comparison. The calculation is done recursively.
 
-Reference: https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda
+**Reference:**    
+https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-39-parallel-prefix-sum-scan-cuda
 
 # PrefixScan_Test
 
@@ -21,7 +22,8 @@ Contains test and performance comparisons of the PrefixScan algorithms.
 
 Contains a Cuckoo Hash implementation for the device.
 
-Reference: https://www.researchgate.net/publication/211178395_Building_an_Efficient_Hash_Table_on_the_GPU
+**Reference:**    
+https://www.researchgate.net/publication/211178395_Building_an_Efficient_Hash_Table_on_the_GPU
 
 # HashTable_Test
 
