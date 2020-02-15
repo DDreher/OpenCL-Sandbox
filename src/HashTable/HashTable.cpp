@@ -46,8 +46,7 @@ bool HashTable::Init(uint32_t table_size)
     }
 
     // 2. Initialize all the memory with empty elements
-    std::vector<uint64_t> empty_elements(next_multiple);
-    std::fill(empty_elements.begin(), empty_elements.end(), mpp::constants::EMPTY);
+    std::vector<uint64_t> empty_elements(next_multiple, mpp::constants::EMPTY);
     status = clEnqueueWriteBuffer(mgr->command_queue, table_buffer_, CL_TRUE, 0, next_multiple * sizeof(uint64_t), empty_elements.data(), 0, NULL, NULL);
     assert(status == mpp::ReturnCode::CODE_SUCCESS);
 
@@ -100,8 +99,7 @@ bool HashTable::Insert(const std::vector<uint32_t>& keys, const std::vector<uint
     if (keys.size() < next_multiple)
     {
         uint32_t num_padded_elements = next_multiple - static_cast<uint32_t>(keys.size());
-        std::vector<uint32_t> empty_elements(num_padded_elements);
-        std::fill(empty_elements.begin(), empty_elements.end(), mpp::constants::EMPTY_32);
+        std::vector<uint32_t> empty_elements(num_padded_elements, mpp::constants::EMPTY_32);
         size_t offset = keys.size() * sizeof(uint32_t);
         size_t num_bytes_written = num_padded_elements * sizeof(uint32_t);
         status = clEnqueueWriteBuffer(mgr->command_queue, keys_buffer, CL_TRUE, offset, num_bytes_written, empty_elements.data(), 0, NULL, NULL);
@@ -186,8 +184,7 @@ std::vector<uint32_t> HashTable::Get(const std::vector<uint32_t>& keys)
     if (keys.size() < next_multiple)
     {
         uint32_t num_padded_elements = next_multiple - static_cast<uint32_t>(keys.size());
-        std::vector<uint32_t> empty_elements(num_padded_elements);
-        std::fill(empty_elements.begin(), empty_elements.end(), mpp::constants::EMPTY_32);
+        std::vector<uint32_t> empty_elements(num_padded_elements, mpp::constants::EMPTY_32);
         size_t offset = keys.size() * sizeof(uint32_t);
         size_t num_bytes_written = num_padded_elements * sizeof(uint32_t);
         status = clEnqueueWriteBuffer(mgr->command_queue, keys_buffer, CL_TRUE, offset, num_bytes_written, empty_elements.data(), 0, NULL, NULL);
