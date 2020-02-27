@@ -36,7 +36,7 @@ bool HashTable::Init(uint32_t table_size)
     assert(mgr != nullptr);
     cl_int status = 0;
 
-    // 1. Allocate enough memory on GPU to fit hash table, padded to wavefront size
+    // 1. Allocate enough memory on GPU to fit hash table
     if(table_buffer_ == 0)
     {
         table_buffer_ = clCreateBuffer(mgr->context, CL_MEM_READ_WRITE, size_ * sizeof(uint64_t), NULL, NULL);
