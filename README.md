@@ -13,9 +13,9 @@ The development environment relies on NVidia GPUs, therefore the OpenCL path dep
 If you use an AMD GPU or don't have this environment variable set you have to adjust the build properties of each project.
 
 **IMPORTANT:**    
-If you don't want to copy the kernel implementations (.cl files) into the build directory to debug / execute the unit tests it's recommended to set the 
-working directory in the build properties of the Visual Studio projects under Configuration Properties -> Debugging -> Working Directory to $(ProjectDir).
-Sadly this seems to be a local setting and can't be commited to the repository.
+If you don't want to copy the kernel implementations (.cl files) into the build directory to debug / execute the unit tests it's recommended to set the working directory in the build properties of the Visual Studio projects under Configuration Properties -> Debugging -> Working Directory to $(ProjectDir).
+Sadly this seems to be a local setting that can't be commited to the repository.
+As of right now the project is not big enough to justify the time it takes to add build scripts.
 
 # Project Structure
 The solution is split up in corresponding projects
